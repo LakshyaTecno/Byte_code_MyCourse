@@ -21,7 +21,7 @@ db.once("open", () => {
   console.log("connected to mongodb");
 });
 
-//require("./routes/auth.route")(app);
+require("./routes/course.route")(app);
 app.listen(serverConfig.PORT, () => {
   console.log("Started the server on the PORT number : ", serverConfig.PORT);
 });
