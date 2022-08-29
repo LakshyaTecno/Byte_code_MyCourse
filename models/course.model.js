@@ -29,19 +29,16 @@ const courseSchema = new mongoose.Schema({
     required: true,
   },
   discount: {
-    type: String,
+    type: Number,
     required: true,
+    min: 1,
+    max: 100,
   },
   rating: {
     type: String,
     required: true,
-    enum: [
-      constants.ratingTypes.one,
-      constants.ratingTypes.two,
-      constants.ratingTypes.three,
-      constants.ratingTypes.four,
-      constants.ratingTypes.five,
-    ],
+    min: 1,
+    max: 5,
   },
   category: {
     type: String,
