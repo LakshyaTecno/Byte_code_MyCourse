@@ -74,12 +74,12 @@ exports.getAllCourse = async (req, res) => {
   const priceMax = req.query.max;
   try {
     let queryObj = {};
-    const courses = await Course.find();
     let filetred_data = [];
     if (courseName) {
       filetred_data = await Course.find({
         name: { $regex: new RegExp(courseName) },
       });
+      console.log(courseName);
     } else {
       queryObj["$or"] = [
         { name: courseName },
