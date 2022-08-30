@@ -13,6 +13,6 @@ module.exports = {
   partnerType: {
     google: "GOOGLE",
     facebook: "FACEBOOK",
-    microsoft: "MICROPSOFT",
+    microsoft: "MICROSOFT",
   },
 };

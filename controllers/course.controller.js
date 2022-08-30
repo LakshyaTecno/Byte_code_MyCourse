@@ -1,3 +1,4 @@
+const { addListener } = require("nodemon");
 const Course = require("../models/course.model");
 
 exports.createCourse = async (req, res) => {
@@ -74,15 +75,10 @@ exports.getAllCourse = async (req, res) => {
   try {
     const courses = await Course.find();
 
-    let filetred_data = [];
     let courseMatchesWithName = [];
     if (courseName) {
-      courses.forEach((cr) => {
-        let crNAme = cr.name + "";
-        console.log(crNAme);
-        if (crNAme.indexOf(courseName) != -1) {
-          courseMatchesWithName.push(cr);
-        }
+      courseMatchesWithName = await Course.find({
+        name: { $regex: new RegExp(courseName) },
       });
     }
 
@@ -111,17 +107,39 @@ exports.getAllCourse = async (req, res) => {
         price: { $gte: priceMin, $lte: priceMax },
       });
     }
-    filetred_data = [
-      ...courseMatchesWithCategory,
-      ...courseMatchesWithName,
-      ...courseMatchesWithPartner,
-      ...courseMatchesWithPrice,
-      ...courseMatchesWithRating,
+    let name = [];
+    let category = [];
+    let partner = [];
+    let price = [];
+    let rating = [];
+    courseMatchesWithName.map((obj) => {
+      name.push(obj.name);
+    });
+    courseMatchesWithCategory.map((obj) => {
+      category.push(obj.category);
+    });
+    courseMatchesWithPrice.map((obj) => {
+      price.push(obj.price);
+    });
+    courseMatchesWithPartner.map((obj) => {
+      partner.push(obj.partner);
+    });
+    courseMatchesWithRating.map((obj) => {
+      rating.push(obj.rating);
+    });
+    queryObj["$and"] = [
+      { name: { $in: name } },
+      { category: { $in: category } },
+      { partner: { $in: partner } },
+      { rating: { $in: rating } },
+      { price: { $in: price } },
     ];
 
+    let filetred_data = await Course.find(queryObj);
+
+    console.log(filetred_data);
     filetred_data = filetred_data.filter(
-      (obj, index, self) =>
-        index === self.findIndex((el) => el[key] === obj[key])
+      (obj, index, self) => index === self.findIndex((el) => el._id === obj._id)
     );
     res.status(200).send(filetred_data);
   } catch (err) {
