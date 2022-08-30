@@ -71,77 +71,63 @@ exports.getAllCourse = async (req, res) => {
   const coursePartner = req.query.partner;
   const priceMin = req.query.min;
   const priceMax = req.query.max;
+  try {
+    const courses = await Course.find();
 
-  const courses = await Course.find();
-  var filetred_data;
-  if (courseName) {
-    filetred_data = [];
-    courses.forEach((cr) => {
-      let crNAme = cr.name + "";
-      console.log(crNAme);
-      if (crNAme.indexOf(courseName) != -1) {
-        filetred_data.push(cr);
-      }
-    });
-    console.log(filetred_data);
-  } else if (courseRating) {
-    filetred_data = await Course.find({
-      rating: courseRating,
-    });
-  } else if (courseCategory) {
-    filetred_data = await Course.find({ category: courseCategory });
-  } else if (coursePartner) {
-    filetred_data = await Course.find({ partner: coursePartner });
-  } else if (priceMin && priceMax) {
-    filetred_data = await Course.find({
-      price: { $gte: priceMin, $lte: priceMax },
-    });
-  } else if (
-    priceMin &&
-    priceMax &&
-    courseRating &&
-    courseCategory &&
-    coursePartner
-  ) {
-    filetred_data = await Course.find({
-      rating: courseRating,
-      price: { $gte: min, $lte: max },
-      category: courseCategory,
-      partner: coursePartner,
-    });
-  } else if (courseRating && courseCategory && coursePartner) {
-    filetred_data = await Course.find({
-      rating: courseRating,
-      category: courseCategory,
-      partner: coursePartner,
-    });
-  } else if (priceMin && priceMax && courseRating && coursePartner) {
-    filetred_data = await Course.find({
-      rating: courseRating,
-      price: { $gte: min, $lte: max },
+    let filetred_data = [];
+    let courseMatchesWithName = [];
+    if (courseName) {
+      courses.forEach((cr) => {
+        let crNAme = cr.name + "";
+        console.log(crNAme);
+        if (crNAme.indexOf(courseName) != -1) {
+          courseMatchesWithName.push(cr);
+        }
+      });
+    }
 
-      partner: coursePartner,
+    var courseMatchesWithRating = [];
+    if (courseRating) {
+      courseMatchesWithRating = await Course.find({
+        rating: courseRating,
+      });
+    }
+
+    var courseMatchesWithCategory = [];
+    if (courseCategory) {
+      courseMatchesWithCategory = await Course.find({
+        category: courseCategory,
+      });
+    }
+
+    var courseMatchesWithPartner = [];
+    if (coursePartner) {
+      courseMatchesWithPartner = await Course.find({ partner: coursePartner });
+    }
+
+    var courseMatchesWithPrice = [];
+    if (priceMin || priceMax) {
+      courseMatchesWithPrice = await Course.find({
+        price: { $gte: priceMin, $lte: priceMax },
+      });
+    }
+    filetred_data = [
+      ...courseMatchesWithCategory,
+      ...courseMatchesWithName,
+      ...courseMatchesWithPartner,
+      ...courseMatchesWithPrice,
+      ...courseMatchesWithRating,
+    ];
+
+    filetred_data = filetred_data.filter(
+      (obj, index, self) =>
+        index === self.findIndex((el) => el[key] === obj[key])
+    );
+    res.status(200).send(filetred_data);
+  } catch (err) {
+    console.log("Some error while filter course ", err.message);
+    res.status(500).send({
+      message: "Some internal error while updating the course",
     });
-  } else if (priceMin && priceMax && courseCategory && coursePartner) {
-    filetred_data = await Course.find({
-      price: { $gte: min, $lte: max },
-      category: courseCategory,
-      partner: coursePartner,
-    });
-  } else if (priceMin && priceMax && courseCategory && courseRating) {
-    filetred_data = await Course.find({
-      price: { $gte: priceMin, $lte: priceMax },
-      category: courseCategory,
-      rating: courseRating,
-    });
-  } else if (priceMin && priceMax && courseCategory) {
-    filetred_data = await Course.find({
-      price: { $gte: priceMin, $lte: priceMax },
-      category: courseCategory,
-    });
-  } else {
-    filetred_data = await Course.find();
   }
-
-  res.status(200).send(filetred_data);
 };
