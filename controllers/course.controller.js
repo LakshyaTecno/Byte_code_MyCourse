@@ -76,30 +76,33 @@ exports.getAllCourse = async (req, res) => {
     let queryObj = {};
     let filetred_data = [];
     if (courseName) {
+      let len = courseName.length;
+      let searchStr = courseName.substring(1, len - 2);
+      console.log(searchStr);
       filetred_data = await Course.find({
-        name: { $regex: new RegExp(courseName) },
-      });
-      console.log(courseName);
+        name: { $regex: new RegExp(searchStr) },
+      }).limit(10);
     } else {
       queryObj["$or"] = [
-        { name: courseName },
         { category: courseCategory },
         { partner: coursePartner },
         { rating: courseRating },
         { price: { $gte: priceMin, $lte: priceMax } },
       ];
       filetred_data = await Course.find(queryObj);
+      filetred_data = filetred_data.filter(
+        (obj, index, self) =>
+          index === self.findIndex((el) => el._id === obj._id)
+      );
     }
 
     console.log(filetred_data);
-    filetred_data = filetred_data.filter(
-      (obj, index, self) => index === self.findIndex((el) => el._id === obj._id)
-    );
+
     res.status(200).send(filetred_data);
   } catch (err) {
     console.log("Some error while filter course ", err.message);
     res.status(500).send({
-      message: "Some internal error while updating the course",
+      message: "Some internal error while gettings the course",
     });
   }
 };
